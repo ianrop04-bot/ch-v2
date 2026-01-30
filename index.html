@@ -1,0 +1,50 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>WhatsApp Bot Setup</h2>
+  <div id="step1">
+    <input id="phone" placeholder="+1234567890">
+    <button onclick="requestCode()">Get Code</button>
+  </div>
+  <div id="step2" style="display:none">
+    <p>Code: <span id="code"></span></p>
+    <input id="userCode" placeholder="Enter code">
+    <button onclick="verifyCode()">Verify</button>
+  </div>
+  <script>
+    let currentPhone = '';
+    
+    async function requestCode() {
+      const phone = document.getElementById('phone').value;
+      currentPhone = phone;
+      
+      const res = await fetch('/api/whatsapp', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action: 'request-code', phone})
+      });
+      
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('code').textContent = data.code;
+        document.getElementById('step1').style.display = 'none';
+        document.getElementById('step2').style.display = 'block';
+      }
+    }
+    
+    async function verifyCode() {
+      const code = document.getElementById('userCode').value;
+      
+      const res = await fetch('/api/whatsapp', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({action: 'verify-code', phone: currentPhone, code})
+      });
+      
+      const data = await res.json();
+      alert(data.success ? '✅ Bot Active!' : '❌ ' + data.error);
+    }
+  </script>
+</body>
+</html>
